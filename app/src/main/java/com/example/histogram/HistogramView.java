@@ -2512,7 +2512,6 @@ public class HistogramView extends View {
             "}";
 
 
-
     private Paint mBottomTextPaint;//底部文字
     private Paint mDateTimeTextPaint;//横纵轴文字 日期&时间
     private Rect mBottomTextBounds;
@@ -2622,6 +2621,9 @@ public class HistogramView extends View {
         explainColorList.add(Color.parseColor("#F9FF04"));
         explainColorList.add(Color.parseColor("#EFC10C"));
         explainColorList.add(Color.parseColor("#9AE07D"));
+        explainColorList.add(Color.CYAN);
+        explainColorList.add(Color.GREEN);
+        explainColorList.add(Color.YELLOW);
     }
 
     @Override
@@ -2685,9 +2687,9 @@ public class HistogramView extends View {
 
             //------> 横向竖线 彩带图
             //测试纯色
-            canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
-                    startY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), topReservedHeight, testVerticalLinePaint);
-
+//            canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
+//                    startY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), topReservedHeight, testVerticalLinePaint);
+//
 
             List<WeekSleepRangesBean> sleepRanges = bodyStatusList.get(i).getSleepRanges();
 
@@ -2709,21 +2711,51 @@ public class HistogramView extends View {
                 float preHouseHeight = coordinateHeight / 24;//每小时高度
                 float preMinuteHeight = preHouseHeight / 60;//每分钟高度
 
-                float columnStartY;
-                float columnEndY;
+                float columnStartY = 0;
+                float columnEndY = 0;
                 if (startHouse >= 0 && startHouse <= 12) {
-                    columnStartY = zeroOriginY + preHouseHeight * startHouse + preMinuteHeight * startMinute;
-
+                    columnStartY = zeroOriginY - preHouseHeight * startHouse + preMinuteHeight * startMinute;
+                    columnEndY = zeroOriginY - preHouseHeight * endHouse + preMinuteHeight * endMinute;
                 } else {
 
                 }
-
-
+                testVerticalLinePaint.setColor(explainColorList.get(rangesBean.getSleepStatus()));
                 canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
-                        startY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
-                        topReservedHeight, testVerticalLinePaint);
+                        columnStartY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), columnEndY, testVerticalLinePaint);
 
             }
+
+//
+//            WeekSleepRangesBean rangesBean = new WeekSleepRangesBean();
+//            rangesBean.setStartTime("07:14:00");
+//            rangesBean.setEndTime("07:20:00");
+//            rangesBean.setSleepStatus(1);
+//            String[] startTimeStrs = rangesBean.getStartTime().split(":");
+//            String[] endTimeStrs = rangesBean.getEndTime().split(":");
+//            int startHouse = Integer.parseInt(startTimeStrs[0]);
+//            int startMinute = Integer.parseInt(startTimeStrs[1]);
+//            int endHouse = Integer.parseInt(endTimeStrs[0]);
+//            int endMinute = Integer.parseInt(endTimeStrs[1]);
+//
+//            float coordinateHeight = startY - topReservedHeight;//绘制坐标总高度
+//            float zeroOriginY = topReservedHeight + coordinateHeight / 2;//00点对应Y坐标
+//
+//            float preHouseHeight = coordinateHeight / 24;//每小时高度
+//            float preMinuteHeight = preHouseHeight / 60;//每分钟高度
+//
+//            float columnStartY = 0;
+//            float columnEndY = 0;
+//            if (startHouse >= 0 && startHouse <= 12) {
+//                columnStartY = zeroOriginY - preHouseHeight * startHouse + preMinuteHeight * startMinute;
+//                columnEndY = zeroOriginY - preHouseHeight * endHouse + preMinuteHeight * endMinute;
+//            } else {
+//
+//            }
+//            testVerticalLinePaint.setColor(explainColorList.get(rangesBean.getSleepStatus()));
+//            canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
+//                    columnStartY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), columnEndY, testVerticalLinePaint);
+
+
             //<------
             //纵向横线
 //            canvas.drawLine(startX, topReservedHeight + (startY - topReservedHeight) / 6 * i, getWidth() - rightReservedWidth, topReservedHeight + (startY - topReservedHeight) / 6 * i, drawPaint);
