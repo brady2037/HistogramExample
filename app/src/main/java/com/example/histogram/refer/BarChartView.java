@@ -1,4 +1,4 @@
-package com.example.histogram;
+package com.example.histogram.refer;
 
 import android.content.Context;
 import android.graphics.BlurMaskFilter;
@@ -8,6 +8,8 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+
+import com.example.histogram.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,8 @@ import androidx.core.content.ContextCompat;
  * Created by JoJo on 2018/8/2.
  * wechat:18510829974
  * description:柱状统计图
+ *
+ * 作实现参考使用
  */
 
 public class BarChartView extends View {

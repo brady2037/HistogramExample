@@ -1,4 +1,4 @@
-package com.example.histogram;
+package com.example.histogram.backup;
 
 import android.content.Context;
 import android.graphics.Canvas;

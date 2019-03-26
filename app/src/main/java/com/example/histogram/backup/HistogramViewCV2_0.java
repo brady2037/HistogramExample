@@ -1,4 +1,4 @@
-package com.example.histogram;
+package com.example.histogram.backup;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,34 +13,34 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
-public class HistogramViewCV1_1 extends View {
+public class HistogramViewCV2_0 extends View {
 
     private Paint mBottomTextPaint;//底部文字
     private Paint mDateTimeTextPaint;//横纵轴文字 日期&时间
     private Rect mBottomTextBounds;
 
     private Paint mBottomRectPaint;//底部提示方块
-    private int mBottomExplainMarginBottom = 18;//底部文字&方块 与最下方margin
-    private int mBottomRectTextMargin = 18;//底部文字&方块 间隔margin
-    private int mBottomRectWidth = 40;//底部方块
-    private int mBottomRectHeight = 30;//底部方块
+    private float mBottomExplainMarginBottom = 18;//底部文字&方块 与最下方margin
+    private float mBottomRectTextMargin = 18;//底部文字&方块 间隔margin
+    private float mBottomRectWidth = 40;//底部方块
+    private float mBottomRectHeight = 30;//底部方块
 
-    private int dateTextMarginBottom = 22;//横向轴日期文字与提示文字上下间隔
-    private int dateTextMarginTop = 10;//横向轴日期文字与上方横线间隔
+    private float dateTextMarginBottom = 22;//横向轴日期文字与提示文字上下间隔
+    private float dateTextMarginTop = 10;//横向轴日期文字与上方横线间隔
 
-    private int timeTextMarginLeft = 20;//左侧竖向时间轴 marginLeft
-    private int timeTextMarginRight = 20;//左侧竖向时间轴 marginRight
+    private float timeTextMarginLeft = 20;//左侧竖向时间轴 marginLeft
+    private float timeTextMarginRight = 20;//左侧竖向时间轴 marginRight
 
 
     private Rect mTimeTextBounds;//纵向时间轴文字
     private Rect mDateTextBounds;//横向日期轴文字
 
-    private int topReservedHeight = 60;//上方预留高度
+    private float topReservedHeight = 60;//上方预留高度
 
-    private int rightReservedWidth = 40;//右侧空白长度
+    private float rightReservedWidth = 40;//右侧空白长度
 
-    private int startX;//绘制坐标 左下角原点 X
-    private int startY;//绘制坐标 左下角原点 Y
+    private float startX;//绘制坐标 左下角原点 X
+    private float startY;//绘制坐标 左下角原点 Y
 
     private Paint testVerticalLinePaint;
 
@@ -52,15 +52,15 @@ public class HistogramViewCV1_1 extends View {
     private List<String> explainTextList = new ArrayList<>();
     private List<Integer> explainColorList = new ArrayList<>();
 
-    public HistogramViewCV1_1(Context context) {
+    public HistogramViewCV2_0(Context context) {
         this(context, null);
     }
 
-    public HistogramViewCV1_1(Context context, @Nullable AttributeSet attrs) {
+    public HistogramViewCV2_0(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public HistogramViewCV1_1(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public HistogramViewCV2_0(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         mBottomTextBounds = new Rect();
@@ -134,7 +134,7 @@ public class HistogramViewCV1_1 extends View {
         //--->底部文字方块
         for (int i = 0; i < explainTextList.size(); i++) {
             //方块 left X坐标 --> 长度等分 - 总长度(方块+文字 )的一半
-            int rectX = getWidth() / (explainTextList.size() + 1) * (i + 1) -
+            float rectX = getWidth() / (explainTextList.size() + 1) * (i + 1) -
                     (mBottomRectWidth + mBottomRectTextMargin + mBottomTextBounds.width()) / 2;
 
             //底部文字
@@ -162,10 +162,9 @@ public class HistogramViewCV1_1 extends View {
 //        drawPaint.setColor(Color.parseColor("#19293B"));
 
         //坐标轴 横
-//        canvas.drawLine(startX, startY, getWidth() - rightReservedWidth, startY, drawPaint);
+        canvas.drawLine(startX, startY, getWidth() - rightReservedWidth, startY, drawPaint);
         //坐标轴 纵
         canvas.drawLine(startX, startY, startX, topReservedHeight, drawPaint);
-
 
         for (int i = 0; i < 7; i++) {
             //纵向时间
@@ -181,10 +180,10 @@ public class HistogramViewCV1_1 extends View {
             canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), startY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), topReservedHeight, testVerticalLinePaint);
 
             //纵向横线
-            canvas.drawLine(startX, topReservedHeight + ((startY - topReservedHeight) / 6 * i), getWidth() - rightReservedWidth, topReservedHeight + ((startY - topReservedHeight) / 6 * i), drawPaint);
+            canvas.drawLine(startX, topReservedHeight + (startY - topReservedHeight) / 6 * i, getWidth() - rightReservedWidth, topReservedHeight + (startY - topReservedHeight) / 6 * i, drawPaint);
         }
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 1; i <= 6; i++) {
 
         }
         //<---
@@ -194,7 +193,7 @@ public class HistogramViewCV1_1 extends View {
     }
 
     //注意mBottomTextBounds 需要在绘制后才能获取
-    public int getBottomExplainHeight() {
+    public float getBottomExplainHeight() {
         if (mBottomTextBounds.height() <= 0) {
             return mBottomRectHeight + mBottomExplainMarginBottom;
         }

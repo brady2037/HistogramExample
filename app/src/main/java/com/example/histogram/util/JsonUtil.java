@@ -11,6 +11,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Json转换工具类
+ */
 public class JsonUtil {
 
     static Gson gson = new Gson();

@@ -2,6 +2,9 @@ package com.example.histogram.bean;
 
 import java.util.List;
 
+/**
+ * 模拟数据类
+ */
 public class BodyStatus {
     private String dayOfWeek;
     private String date;

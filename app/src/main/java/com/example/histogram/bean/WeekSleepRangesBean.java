@@ -1,5 +1,8 @@
 package com.example.histogram.bean;
 
+/**
+ * 模拟数据类
+ */
 public class WeekSleepRangesBean {
 
     private String endTime;

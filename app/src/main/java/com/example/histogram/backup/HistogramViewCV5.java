@@ -1,4 +1,4 @@
-package com.example.histogram;
+package com.example.histogram.backup;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,12 +13,19 @@ import com.example.histogram.bean.RequestResult;
 import com.example.histogram.bean.WeekSleepRangesBean;
 import com.example.histogram.util.JsonUtil;
 
+import org.joda.time.DateTime;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.Nullable;
 
-public class HistogramViewCV3 extends View {
+/**
+ * 使用datatime 12点一个原点 00点一个原点
+ */
+public class HistogramViewCV5 extends View {
 
 
     private String resJsonStr = "{\n" +
@@ -2276,6 +2283,9 @@ public class HistogramViewCV3 extends View {
             "  \"weeklyDAinfoVo\": null\n" +
             "}";
 
+    private SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("HH:mm:ss");
+    private DateTime zeroOriginDT12;
+    private DateTime zeroOriginDT00;
 
     private Paint mBottomTextPaint;//底部文字
     private Paint mDateTimeTextPaint;//横纵轴文字 日期&时间
@@ -2319,15 +2329,15 @@ public class HistogramViewCV3 extends View {
     private List<BodyStatus> bodyStatusList;
     //<-----
 
-    public HistogramViewCV3(Context context) {
+    public HistogramViewCV5(Context context) {
         this(context, null);
     }
 
-    public HistogramViewCV3(Context context, @Nullable AttributeSet attrs) {
+    public HistogramViewCV5(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public HistogramViewCV3(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public HistogramViewCV5(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         mBottomTextBounds = new Rect();
@@ -2388,6 +2398,13 @@ public class HistogramViewCV3 extends View {
         explainColorList.add(Color.parseColor("#F9FF04"));
         explainColorList.add(Color.parseColor("#EFC10C"));
         explainColorList.add(Color.parseColor("#9AE07D"));
+
+        try {
+            zeroOriginDT12 = new DateTime(dateTimeFormatter.parse("12:00:00"));
+            zeroOriginDT00 = new DateTime(dateTimeFormatter.parse("00:00:00"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -2462,6 +2479,7 @@ public class HistogramViewCV3 extends View {
             for (int j = 0; j < sleepRanges.size(); j++) {
 
                 WeekSleepRangesBean rangesBean = sleepRanges.get(j);
+
                 String[] startTimeStrs = rangesBean.getStartTime().split(":");
                 String[] endTimeStrs = rangesBean.getEndTime().split(":");
                 int startHouse = Integer.parseInt(startTimeStrs[0]);
@@ -2470,7 +2488,8 @@ public class HistogramViewCV3 extends View {
                 int endMinute = Integer.parseInt(endTimeStrs[1]);
 
                 float coordinateHeight = startY - topReservedHeight;//绘制坐标总高度
-                float zeroOriginY = topReservedHeight + coordinateHeight / 2;//00点对应Y坐标
+                float zeroOrigin12Y = startY;//12点对应Y坐标
+                float zeroOrigin00Y = startY - (startY - topReservedHeight) / 2;//00点对应Y坐标
 
                 float preHouseHeight = coordinateHeight / 24;//每小时高度
                 float preMinuteHeight = preHouseHeight / 60;//每分钟高度
@@ -2478,27 +2497,79 @@ public class HistogramViewCV3 extends View {
                 float columnStartY = 0;
                 float columnEndY = 0;
                 float zeroOriginHouse = 24;
-                if(startHouse>=0)
-                if (startHouse >= 0 && startHouse <= 12) {
-                    columnStartY = zeroOriginY - preHouseHeight * startHouse - preMinuteHeight * startMinute;
-                } else {
-                    columnStartY = zeroOriginY + preHouseHeight * (zeroOriginHouse - startHouse) - preMinuteHeight * startMinute;
+                float zeroOrigin12House = 12;
+
+                DateTime startDateTime = null;
+                DateTime endDateTime = null;
+                try {
+                    startDateTime = new DateTime(dateTimeFormatter.parse(rangesBean.getStartTime()));
+                    endDateTime = new DateTime(dateTimeFormatter.parse(rangesBean.getEndTime()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    continue;
                 }
-                if (endHouse >= 0 && endHouse <=12) {
-                    columnEndY = zeroOriginY - preHouseHeight * endHouse - preMinuteHeight * endMinute;
+
+                if (startDateTime.isEqual(zeroOriginDT12)) {
+                    if (endDateTime.isEqual(zeroOriginDT12)) {
+                        continue;
+                    }
+                    if (endDateTime.isAfter(zeroOriginDT12)) {
+                        columnStartY = zeroOrigin12Y;
+                    } else {
+                        continue;
+                    }
+                } else if (startDateTime.isAfter(zeroOriginDT12)) {//12点到24点
+                    columnStartY = zeroOrigin12Y - (preHouseHeight * (startHouse - zeroOrigin12House)) - (preMinuteHeight * startMinute);
+                } else if (startDateTime.isBefore(zeroOriginDT12)) {//00点到12点
+                    columnStartY = zeroOrigin00Y - preHouseHeight * startHouse - (preMinuteHeight * startMinute);
                 } else {
-                    columnEndY = zeroOriginY + preHouseHeight * (zeroOriginHouse - endHouse) - preMinuteHeight * endMinute;
+                    throw new NullPointerException("错误 startDateTime异常");
                 }
+
+                if (endDateTime.isEqual(zeroOriginDT12)) {
+                    if (startDateTime.isEqual(zeroOriginDT12)) {
+                        continue;
+                    }
+                    if (startDateTime.isBefore(zeroOriginDT12)) {
+                        columnEndY = topReservedHeight;
+                    } else {
+                        continue;
+                    }
+                } else if (endDateTime.isAfter(zeroOriginDT12)) {
+                    columnEndY = zeroOrigin12Y - (preHouseHeight * (endHouse - zeroOrigin12House)) - (preMinuteHeight * endMinute);
+                } else if (endDateTime.isBefore(zeroOriginDT12)) {
+                    columnEndY = zeroOrigin00Y - preHouseHeight * endHouse - (preMinuteHeight * endMinute);
+                } else {
+                    throw new NullPointerException("错误 endDateTime异常");
+                }
+
+//                if (startHouse >= 0 && startHouse < 12) {
+//                    if (endHouse > 12) {
+//                        endHouse = 12;//不绘制超过00-12点的
+//                    }
+//                    columnStartY = zeroOrigin12Y - preHouseHeight * startHouse - preMinuteHeight * startMinute;
+//                    columnEndY = zeroOrigin12Y - preHouseHeight * endHouse - preMinuteHeight * endMinute;
+//
+//                } else {//把原点00:00 当做24点 24点-8点等于从00点向下增加的小时数 减去向上增加的分钟
+//                    if (endHouse >= 0 && endHouse <= 12) {
+//                        endHouse = 24;
+//                        endMinute = 0;
+//                    }
+//                    columnStartY = zeroOrigin12Y - (preHouseHeight * (startHouse - zeroOrigin12House)) - (preMinuteHeight * startMinute);
+//                    columnEndY = zeroOrigin12Y - (preHouseHeight * (startHouse - zeroOrigin12House)) - (preMinuteHeight * startMinute);
+//                }
+
 
                 testVerticalLinePaint.setColor(getExplainColor(rangesBean.getSleepStatus()));
                 canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
                         columnStartY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), columnEndY, testVerticalLinePaint);
             }
 
-//
+            //--------测试算法----------------------
+
 //            WeekSleepRangesBean rangesBean = new WeekSleepRangesBean();
 //            rangesBean.setStartTime("04:19:00");
-//            rangesBean.setEndTime("08:00:00");
+//            rangesBean.setEndTime("12:00:00");
 //            rangesBean.setSleepStatus(1);
 //            String[] startTimeStrs = rangesBean.getStartTime().split(":");
 //            String[] endTimeStrs = rangesBean.getEndTime().split(":");
@@ -2506,39 +2577,64 @@ public class HistogramViewCV3 extends View {
 //            int startMinute = Integer.parseInt(startTimeStrs[1]);
 //            int endHouse = Integer.parseInt(endTimeStrs[0]);
 //            int endMinute = Integer.parseInt(endTimeStrs[1]);
-//
+//            float columnStartY = 0;
+//            float columnEndY = 0;
+//            float zeroOriginHouse = 24;
+//            float zeroOrigin12House = 12;
 //            float coordinateHeight = startY - topReservedHeight;//绘制坐标总高度
-//            float zeroOriginY = topReservedHeight + coordinateHeight / 2;//00点对应Y坐标
+//            float zeroOrigin12Y = startY;//12点对应Y坐标
+//            float zeroOrigin00Y = startY - (startY - topReservedHeight) / 2;//00点对应Y坐标
 //
 //            float preHouseHeight = coordinateHeight / 24;//每小时高度
 //            float preMinuteHeight = preHouseHeight / 60;//每分钟高度
 //
-//            float columnStartY = 0;
-//            float columnEndY = 0;
-//            float zeroOriginHouse = 24;
-//            testVerticalLinePaint.setColor(getExplainColor(rangesBean.getSleepStatus()));
-//            if (startHouse >= 0 && startHouse < 12) {
-//                if (endHouse > 12) {
-//                    endHouse = 12;//不绘制超过00-12点的
-//                }
-//                columnStartY = zeroOriginY - preHouseHeight * startHouse - preMinuteHeight * startMinute;
-//                columnEndY = zeroOriginY - preHouseHeight * endHouse - preMinuteHeight * endMinute;
 //
-//                canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
-//                        columnStartY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), columnEndY, testVerticalLinePaint);
-//
-//            } else {//把原点00:00 当做24点 24点-8点等于从00点向下增加的小时数 减去向上增加的分钟
-//                if (endHouse >= 0 && endHouse <= 12) {
-//                    endHouse = 24;
-//                    endMinute = 0;
-//                }
-//                columnStartY = zeroOriginY + preHouseHeight * (zeroOriginHouse - startHouse) - preMinuteHeight * startMinute;
-//                columnEndY = zeroOriginY + preHouseHeight * (zeroOriginHouse - endHouse) - preMinuteHeight * endMinute;
-//
-//                canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
-//                        columnStartY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), columnEndY, testVerticalLinePaint);
+//            DateTime startDateTime = null;
+//            DateTime endDateTime = null;
+//            try {
+//                startDateTime = new DateTime(dateTimeFormatter.parse(rangesBean.getStartTime()));
+//                endDateTime = new DateTime(dateTimeFormatter.parse(rangesBean.getEndTime()));
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//                continue;
 //            }
-
+//
+//            if (startDateTime.isEqual(zeroOriginDT12)) {
+//                if (endDateTime.isEqual(zeroOriginDT12)) {
+//                    continue;
+//                }
+//                if (endDateTime.isAfter(zeroOriginDT12)) {
+//                    columnStartY = zeroOrigin12Y;
+//                } else {
+//                    continue;
+//                }
+//            } else if (startDateTime.isAfter(zeroOriginDT12)) {//12点-24点
+//                columnStartY = zeroOrigin12Y - (preHouseHeight * (startHouse - zeroOrigin12House)) - (preMinuteHeight * startMinute);
+//            } else if (startDateTime.isBefore(zeroOriginDT12)) {//00点到12点
+//                columnStartY = zeroOrigin00Y - preHouseHeight * startHouse - (preMinuteHeight * startMinute);
+//            } else {
+//                throw new NullPointerException("错误 startDateTime异常");
+//            }
+//
+//            if (endDateTime.isEqual(zeroOriginDT12)) {
+//                if (startDateTime.isEqual(zeroOriginDT12)) {
+//                    continue;
+//                }
+//                if (startDateTime.isBefore(zeroOriginDT12)) {
+//                    columnEndY = topReservedHeight;
+//                } else {
+//                    continue;
+//                }
+//            } else if (endDateTime.isAfter(zeroOriginDT12)) {
+//                columnEndY = zeroOrigin12Y - (preHouseHeight * (endHouse - zeroOrigin12House)) - (preMinuteHeight * endMinute);
+//            } else if (endDateTime.isBefore(zeroOriginDT12)) {
+//                columnEndY = zeroOrigin00Y - preHouseHeight * endHouse - (preMinuteHeight * endMinute);
+//            } else {
+//                throw new NullPointerException("错误 endDateTime异常");
+//            }
+//            testVerticalLinePaint.setColor(getExplainColor(rangesBean.getSleepStatus()));
+//                canvas.drawLine(startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1),
+//                        columnStartY, startX + ((getWidth() - rightReservedWidth - startX) / 8) * (i + 1), columnEndY, testVerticalLinePaint);
 
             //<------
             //纵向横线

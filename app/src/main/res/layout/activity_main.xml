@@ -14,7 +14,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.example.histogram.HistogramViewCV5test
+    <com.example.histogram.backup.HistogramViewCV5test
         android:id="@+id/histogramViewcv5"
         android:layout_width="match_parent"
         android:layout_height="200dp"
@@ -24,7 +24,7 @@
         app:layout_constraintTop_toBottomOf="@id/histogramView" />
 
 
-    <com.example.histogram.BarChartView
+    <com.example.histogram.refer.BarChartView
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:visibility="gone"

@@ -1,4 +1,4 @@
-package com.example.histogram;
+package com.example.histogram.backup;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,6 +13,7 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
+//实现备份
 public class HistogramViewCopy extends View {
 
     private Paint mBottomTextPaint;//底部文字
