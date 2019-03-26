@@ -18,7 +18,7 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
-public class HistogramView extends View {
+public class HistogramViewCV3 extends View {
 
 
     private String resJsonStr = "{\n" +
@@ -2319,15 +2319,15 @@ public class HistogramView extends View {
     private List<BodyStatus> bodyStatusList;
     //<-----
 
-    public HistogramView(Context context) {
+    public HistogramViewCV3(Context context) {
         this(context, null);
     }
 
-    public HistogramView(Context context, @Nullable AttributeSet attrs) {
+    public HistogramViewCV3(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public HistogramView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public HistogramViewCV3(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         mBottomTextBounds = new Rect();
@@ -2470,7 +2470,7 @@ public class HistogramView extends View {
                 int endMinute = Integer.parseInt(endTimeStrs[1]);
 
                 float coordinateHeight = startY - topReservedHeight;//绘制坐标总高度
-                float zeroOriginY = startY;//00点对应Y坐标
+                float zeroOriginY = topReservedHeight + coordinateHeight / 2;//00点对应Y坐标
 
                 float preHouseHeight = coordinateHeight / 24;//每小时高度
                 float preMinuteHeight = preHouseHeight / 60;//每分钟高度
@@ -2478,7 +2478,6 @@ public class HistogramView extends View {
                 float columnStartY = 0;
                 float columnEndY = 0;
                 float zeroOriginHouse = 24;
-                float zeroOrigin12House = 12;
                 if (startHouse >= 0 && startHouse < 12) {
                     if (endHouse > 12) {
                         endHouse = 12;//不绘制超过00-12点的
@@ -2491,7 +2490,7 @@ public class HistogramView extends View {
                         endHouse = 24;
                         endMinute = 0;
                     }
-                    columnStartY = zeroOriginY - (preHouseHeight * (startHouse-zeroOriginHouse)) - (preMinuteHeight * startMinute);
+                    columnStartY = zeroOriginY + preHouseHeight * (zeroOriginHouse - startHouse) - preMinuteHeight * startMinute;
                     columnEndY = zeroOriginY + preHouseHeight * (zeroOriginHouse - endHouse) - preMinuteHeight * endMinute;
                 }
                 testVerticalLinePaint.setColor(getExplainColor(rangesBean.getSleepStatus()));
